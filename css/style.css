@@ -144,3 +144,29 @@ body{position:fixed;inset:0;}
   background:rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer;}
 .lightbox .lb-prev{left:12px;}.lightbox .lb-next{right:12px;}
 @media(min-width:820px){.ai-grid{grid-template-columns:1fr 1fr;}}
+
+/* ===== 創新作為：主題橫幅 / 分組標題 / 外部連結 / PDF 附件 ===== */
+.card-imgs.banner-imgs{grid-template-columns:1fr;margin-top:16px;}
+.card-imgs.banner-imgs figure{aspect-ratio:auto;}
+.card-imgs.banner-imgs img{height:auto;object-fit:contain;}
+.card-imgs.banner-imgs .ci-cap{font-size:12px;padding:22px 10px 8px;}
+
+.ai-group{grid-column:1/-1;margin:14px 0 0;padding:10px 14px;border-radius:10px;
+  font-size:13.5px;line-height:1.6;font-weight:900;color:#eaf6ff;
+  background:rgba(52,211,153,.12);border-left:4px solid var(--accent,#34d399);}
+.ai-group:first-child{margin-top:0;}
+
+.card-links{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+.ext-link{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;
+  font-size:12px;font-weight:700;text-decoration:none;color:#eaf6ff;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);transition:background .2s;}
+.ext-link:hover{background:rgba(255,255,255,.18);}
+
+.card-files{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.file-link{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+  text-decoration:none;background:rgba(255,255,255,.06);
+  border:1px dashed rgba(255,255,255,.28);transition:background .2s,transform .2s;}
+.file-link:hover{background:rgba(255,255,255,.14);transform:translateX(3px);}
+.fl-ic{font-size:18px;flex:none;}
+.fl-tx{flex:1;font-size:12.5px;line-height:1.5;font-weight:700;color:#eaf6ff;}
+.fl-go{flex:none;font-size:11px;font-weight:900;color:var(--accent,#34d399);white-space:nowrap;}

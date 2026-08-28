@@ -68,6 +68,33 @@ function renderCardImages(grpId, images) {
   return `<div class="card-imgs" data-grp="${grpId}">${figs}</div>`;
 }
 
+// 主題橫幅（總覽圖，整段最上方；點擊可放大）
+function renderBanner(sec) {
+  if (!sec.banner) return '';
+  const grp = sec.id + '-banner';
+  IMG_GROUPS[grp] = [sec.banner];
+  return `<div class="card-imgs banner-imgs" data-grp="${grp}">
+    <figure data-idx="0"><img src="${esc(sec.banner.img)}" alt="${esc(sec.banner.caption)}" loading="lazy">
+    <span class="ci-cap">${esc(sec.banner.caption)}</span></figure></div>`;
+}
+
+// 相關連結（由文件 QR Code 解析而來）
+function renderLinks(links) {
+  if (!links || !links.length) return '';
+  return `<div class="card-links">${links
+    .map((l) => `<a class="ext-link" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${esc(l.label)}</a>`)
+    .join('')}</div>`;
+}
+
+// PDF 附件（開新分頁檢視）
+function renderFiles(files) {
+  if (!files || !files.length) return '';
+  return `<div class="card-files">${files
+    .map((f) => `<a class="file-link" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">
+      <span class="fl-ic">📄</span><span class="fl-tx">${esc(f.title)}</span><span class="fl-go">開啟 PDF ↗</span></a>`)
+    .join('')}</div>`;
+}
+
 function renderBody(sec) {
   if (sec.type === 'list') {
     return `<ol class="list">${sec.items
@@ -77,8 +104,10 @@ function renderBody(sec) {
   if (sec.type === 'ai') {
     const line = sec.typewriter ? `<div class="ai-line">${esc(sec.typewriter)}</div>` : '';
     const cards = `<div class="ai-grid">${sec.cards
-      .map((c, j) => `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b>` +
-        `<p>${esc(c.desc)}</p>${renderDetail(c.detail)}${renderCardImages(sec.id + '-' + j, c.images)}</div>`)
+      .map((c, j) => (c.group ? `<h3 class="ai-group">${esc(c.group)}</h3>` : '') +
+        `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b>` +
+        `<p>${esc(c.desc)}</p>${renderDetail(c.detail)}${renderCardImages(sec.id + '-' + j, c.images)}` +
+        `${renderLinks(c.links)}${renderFiles(c.files)}</div>`)
       .join('')}</div>`;
     return line + cards;
   }
@@ -96,6 +125,7 @@ SECTIONS.forEach((sec, i) => {
         <div><h2>${esc(sec.name)}</h2><span class="sec-en">${esc(sec.en)}</span></div>
       </div>
       <p class="sec-intro">${esc(sec.intro)}</p>
+      ${renderBanner(sec)}
       ${renderStats(sec)}
       ${renderTables(sec)}
       ${renderBody(sec)}

@@ -291,6 +291,23 @@ function loadGLTFModel(url, targetHeight, shadow = true, onComplete, retryCount 
   );
 }
 
+// ---------- 點擊判定參數（手機放寬）----------
+const TAP_MOVE = isMobile ? 18 : 8;   // 允許的手指位移（像素）
+const TAP_TIME = 800;                  // 允許的按住時間（毫秒）
+const TAP_TOL = isMobile ? 60 : 28;    // 未直接命中時的螢幕容錯半徑（像素）
+
+// 讓浮動標籤可被輕觸開啟（拖曳則不觸發，交還給場景旋轉）
+function bindLabelTap(el, id) {
+  let d = null;
+  el.addEventListener('pointerdown', (e) => { d = { x: e.clientX, y: e.clientY, t: Date.now() }; });
+  el.addEventListener('pointerup', (e) => {
+    if (!d || !started) { d = null; return; }
+    const moved = Math.hypot(e.clientX - d.x, e.clientY - d.y);
+    if (moved < TAP_MOVE && Date.now() - d.t < TAP_TIME) { e.stopPropagation(); openPanel(id); }
+    d = null;
+  });
+}
+
 // ---------- 擺放 ----------
 const interactives = [];
 function place(obj, x, z, id) {
@@ -308,6 +325,10 @@ function place(obj, x, z, id) {
     const label = new THREE.CSS2DObject(el);
     label.position.set(0, obj.userData.labelY || 3.4, 0);
     obj.add(label); obj.userData.labelEl = el;
+    // 讓浮動標籤本身可直接點擊（手機最可靠的點擊目標）
+    el.style.pointerEvents = 'auto';
+    el.style.cursor = 'pointer';
+    bindLabelTap(el, id);
   }
   return obj;
 }
@@ -392,16 +413,41 @@ function toInteractive(obj) {
   while (obj) { if (obj.userData && obj.userData.id) return obj; obj = obj.parent; }
   return null;
 }
+
+// 將互動物件投影到螢幕座標（取模型中段作為中心點）
+const _v = new THREE.Vector3();
+function screenPos(obj) {
+  obj.getWorldPosition(_v);
+  _v.y += 1.4;
+  _v.project(camera);
+  return { x: (_v.x * 0.5 + 0.5) * innerWidth, y: (-_v.y * 0.5 + 0.5) * innerHeight };
+}
+
+// 依螢幕座標挑選互動物件：先精準射線命中，未中則取容錯半徑內最近者
+function pickInteractive(cx, cy) {
+  pointer.x = (cx / innerWidth) * 2 - 1;
+  pointer.y = -(cy / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(interactives, true)[0];
+  if (hit) { const n = toInteractive(hit.object); if (n) return n; }
+  // 近距離容錯：手指未精準落在模型上時，改取最接近的互動物件
+  let best = null, bestD = TAP_TOL;
+  interactives.forEach((o) => {
+    if (!o.userData || !o.userData.id) return;
+    const p = screenPos(o);
+    const d = Math.hypot(p.x - cx, p.y - cy);
+    if (d < bestD) { bestD = d; best = o; }
+  });
+  return best;
+}
+
 renderer.domElement.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: Date.now() }; });
 renderer.domElement.addEventListener('pointerup', (e) => {
   if (!down) return;
   const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
-  if (moved < 8 && Date.now() - down.t < 500) {
-    pointer.x = (e.clientX / innerWidth) * 2 - 1;
-    pointer.y = -(e.clientY / innerHeight) * 2 + 1;
-    raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(interactives, true)[0];
-    if (hit) { const n = toInteractive(hit.object); if (n) openPanel(n.userData.id); }
+  if (moved < TAP_MOVE && Date.now() - down.t < TAP_TIME) {
+    const n = pickInteractive(e.clientX, e.clientY);
+    if (n) openPanel(n.userData.id);
   }
   down = null;
 });
@@ -439,11 +485,25 @@ function renderImgs(grp, imgs) {
   IMG_GROUPS[grp] = imgs;
   return `<div class="card-imgs" data-grp="${grp}">${imgs.map((g, i) => `<figure data-idx="${i}"><img src="${esc(g.img)}" alt="${esc(g.caption)}" loading="lazy"><span class="ci-cap">${esc(g.caption)}</span></figure>`).join('')}</div>`;
 }
+function renderBanner(sec) {
+  if (!sec.banner) return '';
+  const grp = sec.id + '-banner';
+  IMG_GROUPS[grp] = [sec.banner];
+  return `<div class="card-imgs banner-imgs" data-grp="${grp}"><figure data-idx="0"><img src="${esc(sec.banner.img)}" alt="${esc(sec.banner.caption)}" loading="lazy"><span class="ci-cap">${esc(sec.banner.caption)}</span></figure></div>`;
+}
+function renderLinks(links) {
+  if (!links || !links.length) return '';
+  return `<div class="card-links">${links.map((l) => `<a class="ext-link" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">🔗 ${esc(l.label)}</a>`).join('')}</div>`;
+}
+function renderFiles(files) {
+  if (!files || !files.length) return '';
+  return `<div class="card-files">${files.map((f) => `<a class="file-link" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer"><span class="fl-ic">📄</span><span class="fl-tx">${esc(f.title)}</span><span class="fl-go">開啟 PDF ↗</span></a>`).join('')}</div>`;
+}
 function renderBody(sec) {
   if (sec.type === 'list') return `<ol class="list">${sec.items.map((it) => `<li><h3>${esc(it.heading)}</h3><p>${esc(it.text)}</p>${renderDetail(it.detail)}</li>`).join('')}</ol>`;
   if (sec.type === 'ai') {
     const line = sec.typewriter ? `<div class="ai-line">${esc(sec.typewriter)}</div>` : '';
-    return line + `<div class="ai-grid">${sec.cards.map((c, j) => `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b><p>${esc(c.desc)}</p>${renderDetail(c.detail)}${renderImgs(sec.id + '-' + j, c.images)}</div>`).join('')}</div>`;
+    return line + renderBanner(sec) + `<div class="ai-grid">${sec.cards.map((c, j) => (c.group ? `<h3 class="ai-group">${esc(c.group)}</h3>` : '') + `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b><p>${esc(c.desc)}</p>${renderDetail(c.detail)}${renderImgs(sec.id + '-' + j, c.images)}${renderLinks(c.links)}${renderFiles(c.files)}</div>`).join('')}</div>`;
   }
   return '';
 }
