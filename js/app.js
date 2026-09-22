@@ -7,6 +7,19 @@ const ICONS   = ['📋', '🏅', '🤖'];
 
 const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
+// 重點標示：**手動標記** 與 數據（數字＋單位／百分比／金額）自動標示
+const RE_PCT = /(\d[\d,]*(?:\.\d+)?\s*(?:％|%))/g;
+const RE_MONEY = /(\d{1,3}(?:,\d{3})+\s*元)/g;
+const RE_UNIT = /(\d[\d,]*(?:\.\d+)?\s*(?:場次|座數|件數|人次|座|件|家|台|項|份|則|人|次|天|筆|冊))/g;
+function hl(t) {
+  return String(t)
+    .replace(/\*\*([^*]+)\*\*/g, '<span class="hl">$1</span>')
+    .replace(RE_PCT, '<span class="hl">$1</span>')
+    .replace(RE_MONEY, '<span class="hl">$1</span>')
+    .replace(RE_UNIT, '<span class="hl">$1</span>');
+}
+const esch = (s) => hl(esc(s));
+
 // 圖片群組（供燈箱依主題翻頁）
 const IMG_GROUPS = {};
 
@@ -39,23 +52,45 @@ function renderStats(sec) {
     .join('')}</div>`;
 }
 
-function renderTables(sec) {
-  if (!sec.tables || !sec.tables.length) return '';
-  return sec.tables.map((t) => {
+// 收納式數據表：平常收合，點擊以動畫展開
+function renderTables(secOrTables) {
+  const list = Array.isArray(secOrTables) ? secOrTables : (secOrTables && secOrTables.tables);
+  if (!list || !list.length) return '';
+  return list.map((t) => {
     const head = `<tr>${t.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr>`;
-    const body = t.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
-    return `<div class="dtable-wrap"><div class="dtable-title">${esc(t.title)}</div>
-      <div class="dtable-scroll"><table class="dtable"><thead>${head}</thead><tbody>${body}</tbody></table></div></div>`;
+    const body = t.rows
+      .map((r, i) => `<tr style="--r:${i}">${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`)
+      .join('');
+    return `<div class="tbl">
+      <button class="tmore" type="button"><span class="tm-ic">▦</span><span class="tm-tx">${esc(t.title)}</span><span class="tm-go">展開表格 <i class="caret">▾</i></span></button>
+      <div class="tbl-body"><div class="tbl-inner"><div class="dtable-scroll">
+        <table class="dtable"><thead>${head}</thead><tbody>${body}</tbody></table>
+      </div></div></div>
+    </div>`;
   }).join('');
+}
+
+// 詳情：支援「字串」「字串陣列」與「小項分組 {no, sub, points, tables}」
+function renderDetailInner(detail) {
+  if (Array.isArray(detail)) {
+    const isGroup = (d) => d && typeof d === 'object';
+    if (!detail.some(isGroup)) return `<ul class="d-list">${detail.map((d) => `<li>${esch(d)}</li>`).join('')}</ul>`;
+    return detail.map((d) => {
+      if (!isGroup(d)) return `<ul class="d-list"><li>${esch(d)}</li></ul>`;
+      const pts = (d.points || []).map((x) => `<li>${esch(x)}</li>`).join('');
+      return `<div class="d-group">
+        <h4 class="d-sub">${d.no ? `<span class="d-no">${esc(d.no)}</span>` : ''}${esc(d.sub || '')}</h4>
+        ${pts ? `<ul class="d-list">${pts}</ul>` : ''}${renderTables(d.tables)}` +
+        `${renderLinks(d.links)}${renderFiles(d.files)}</div>`;
+    }).join('');
+  }
+  return `<p>${esch(detail)}</p>`;
 }
 
 function renderDetail(detail) {
   if (!detail) return '';
-  const inner = Array.isArray(detail)
-    ? `<ul>${detail.map((d) => `<li>${esc(d)}</li>`).join('')}</ul>`
-    : `<p>${esc(detail)}</p>`;
   return `<button class="more" type="button">展開詳情 <span class="caret">▾</span></button>
-    <div class="detail"><div class="detail-inner">${inner}</div></div>`;
+    <div class="detail"><div class="detail-inner">${renderDetailInner(detail)}</div></div>`;
 }
 
 // 卡片內的實錄照片（圖文合一）
@@ -98,15 +133,16 @@ function renderFiles(files) {
 function renderBody(sec) {
   if (sec.type === 'list') {
     return `<ol class="list">${sec.items
-      .map((it) => `<li><h3>${esc(it.heading)}</h3><p>${esc(it.text)}</p>${renderDetail(it.detail)}</li>`)
+      .map((it) => `<li><h3>${esc(it.heading)}</h3><p>${esch(it.text)}</p>${renderDetail(it.detail)}` +
+        `${renderTables(it.tables)}${renderLinks(it.links)}${renderFiles(it.files)}</li>`)
       .join('')}</ol>`;
   }
   if (sec.type === 'ai') {
     const line = sec.typewriter ? `<div class="ai-line">${esc(sec.typewriter)}</div>` : '';
     const cards = `<div class="ai-grid">${sec.cards
-      .map((c, j) => (c.group ? `<h3 class="ai-group">${esc(c.group)}</h3>` : '') +
+      .map((c, j) => (c.group ? `<h3 class="ai-group">${esc(c.group)}${c.groupSub ? `<span class="ag-sub">${esc(c.groupSub)}</span>` : ''}</h3>` : '') +
         `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b>` +
-        `<p>${esc(c.desc)}</p>${renderDetail(c.detail)}${renderCardImages(sec.id + '-' + j, c.images)}` +
+        `<p>${esch(c.desc)}</p>${renderDetail(c.detail)}${renderCardImages(sec.id + '-' + j, c.images)}` +
         `${renderLinks(c.links)}${renderFiles(c.files)}</div>`)
       .join('')}</div>`;
     return line + cards;
@@ -124,7 +160,7 @@ SECTIONS.forEach((sec, i) => {
         <span class="sec-dot">${ICONS[i]}</span>
         <div><h2>${esc(sec.name)}</h2><span class="sec-en">${esc(sec.en)}</span></div>
       </div>
-      <p class="sec-intro">${esc(sec.intro)}</p>
+      <p class="sec-intro">${esch(sec.intro)}</p>
       ${renderBanner(sec)}
       ${renderStats(sec)}
       ${renderTables(sec)}
@@ -133,13 +169,37 @@ SECTIONS.forEach((sec, i) => {
   main.appendChild(el);
 });
 
-// ---- 展開/收合 ----
+// ---- 展開/收合（高度自動量測，巢狀展開不會被裁切）----
+function slideOpen(el) {
+  el.style.maxHeight = el.scrollHeight + 'px';
+  el.classList.add('open');
+  const done = (ev) => {
+    if (ev.target !== el || ev.propertyName !== 'max-height') return;
+    el.style.maxHeight = 'none';
+    el.removeEventListener('transitionend', done);
+  };
+  el.addEventListener('transitionend', done);
+}
+function slideClose(el) {
+  el.style.maxHeight = el.scrollHeight + 'px';
+  el.classList.remove('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => { el.style.maxHeight = '0px'; }));
+}
+
 main.addEventListener('click', (e) => {
+  const tbtn = e.target.closest('.tmore');
+  if (tbtn) {
+    const body = tbtn.nextElementSibling;
+    const on = tbtn.classList.toggle('open');
+    if (on) slideOpen(body); else slideClose(body);
+    tbtn.querySelector('.tm-go').firstChild.textContent = on ? '收合表格 ' : '展開表格 ';
+    return;
+  }
   const btn = e.target.closest('.more');
   if (!btn) return;
   const detail = btn.nextElementSibling;
   const open = btn.classList.toggle('open');
-  detail.classList.toggle('open', open);
+  if (open) slideOpen(detail); else slideClose(detail);
   btn.firstChild.textContent = open ? '收合詳情 ' : '展開詳情 ';
 });
 

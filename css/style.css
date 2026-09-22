@@ -103,8 +103,8 @@ body{position:fixed;inset:0;}
 .dtable td{padding:9px 12px;border-top:1px solid var(--sky-2);color:var(--navy-soft);}
 .dtable tr:last-child td{font-weight:700;color:var(--navy);background:color-mix(in srgb,var(--accent,#2f80c4) 6%,#fff);}
 .list{list-style:none;display:flex;flex-direction:column;gap:14px;counter-reset:li;}
-.list li{position:relative;padding:14px 14px 14px 52px;border-radius:16px;background:var(--sky-1);counter-increment:li;}
-.list li::before{content:counter(li,decimal-leading-zero);position:absolute;left:12px;top:13px;width:28px;height:28px;border-radius:9px;
+.list > li{position:relative;padding:14px 14px 14px 52px;border-radius:16px;background:var(--sky-1);counter-increment:li;}
+.list > li::before{content:counter(li,decimal-leading-zero);position:absolute;left:12px;top:13px;width:28px;height:28px;border-radius:9px;
   background:var(--accent,#2f80c4);color:#fff;font-family:var(--font-en);font-weight:700;font-size:12px;display:grid;place-items:center;}
 .list h3{font-size:15.5px;font-weight:700;margin-bottom:5px;}
 .list p{font-size:13.5px;line-height:1.8;color:var(--navy-soft);}
@@ -112,7 +112,7 @@ body{position:fixed;inset:0;}
   color:var(--accent,#2f80c4);background:color-mix(in srgb,var(--accent,#2f80c4) 10%,#fff);
   border:1px solid color-mix(in srgb,var(--accent,#2f80c4) 26%,#fff);border-radius:999px;padding:6px 13px;}
 .more .caret{transition:transform .25s;}.more.open .caret{transform:rotate(180deg);}
-.detail{overflow:hidden;max-height:0;transition:max-height .35s ease;}.detail.open{max-height:1600px;}
+.detail{overflow:hidden;max-height:0;transition:max-height .35s ease;}.detail.open{max-height:8000px;}
 .detail-inner{padding-top:12px;}
 .detail-inner ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
 .detail-inner li{position:relative;padding-left:16px;font-size:13px;line-height:1.75;color:var(--navy-soft);}
@@ -145,28 +145,86 @@ body{position:fixed;inset:0;}
 .lightbox .lb-prev{left:12px;}.lightbox .lb-next{right:12px;}
 @media(min-width:820px){.ai-grid{grid-template-columns:1fr 1fr;}}
 
-/* ===== 創新作為：主題橫幅 / 分組標題 / 外部連結 / PDF 附件 ===== */
+/* ===== 創新作為：主題橫幅 / 分組標題 / 外部連結 / PDF 附件 =====
+   註：#panel 為白底淺色面板，文字一律使用深色。--accent 在「創新作為」是淺綠
+   (#34d399)，直接拿來當文字或底色會看不清楚，故一律改用加深後的 --ink-a。 */
+#panel{--ink-a:color-mix(in srgb,var(--accent,#2f80c4) 45%,#06111a);}
 .card-imgs.banner-imgs{grid-template-columns:1fr;margin-top:16px;}
-.card-imgs.banner-imgs figure{aspect-ratio:auto;}
+.card-imgs.banner-imgs figure{aspect-ratio:auto;background:#fff;}
 .card-imgs.banner-imgs img{height:auto;object-fit:contain;}
 .card-imgs.banner-imgs .ci-cap{font-size:12px;padding:22px 10px 8px;}
 
-.ai-group{grid-column:1/-1;margin:14px 0 0;padding:10px 14px;border-radius:10px;
-  font-size:13.5px;line-height:1.6;font-weight:900;color:#eaf6ff;
-  background:rgba(52,211,153,.12);border-left:4px solid var(--accent,#34d399);}
+.ai-group{grid-column:1/-1;margin:16px 0 0;padding:11px 14px;border-radius:12px;
+  font-size:13.5px;line-height:1.6;font-weight:900;color:var(--navy);
+  background:color-mix(in srgb,var(--accent,#2f80c4) 15%,#fff);
+  border-left:5px solid var(--accent,#2f80c4);}
 .ai-group:first-child{margin-top:0;}
 
 .card-links{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
-.ext-link{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;
-  font-size:12px;font-weight:700;text-decoration:none;color:#eaf6ff;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);transition:background .2s;}
-.ext-link:hover{background:rgba(255,255,255,.18);}
+.ext-link{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:999px;
+  font-size:12.5px;font-weight:800;text-decoration:none;color:#fff;
+  background:var(--ink-a);border:1px solid var(--ink-a);
+  box-shadow:var(--shadow-sm);}
+.ext-link:hover{filter:brightness(1.1);}
 
 .card-files{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
-.file-link{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
-  text-decoration:none;background:rgba(255,255,255,.06);
-  border:1px dashed rgba(255,255,255,.28);transition:background .2s,transform .2s;}
-.file-link:hover{background:rgba(255,255,255,.14);transform:translateX(3px);}
+.file-link{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:12px;
+  text-decoration:none;background:#fff;
+  border:1px solid color-mix(in srgb,var(--accent,#2f80c4) 40%,#fff);
+  box-shadow:var(--shadow-sm);transition:background .2s,transform .2s;}
+.file-link:hover{background:color-mix(in srgb,var(--accent,#2f80c4) 10%,#fff);transform:translateX(3px);}
 .fl-ic{font-size:18px;flex:none;}
-.fl-tx{flex:1;font-size:12.5px;line-height:1.5;font-weight:700;color:#eaf6ff;}
-.fl-go{flex:none;font-size:11px;font-weight:900;color:var(--accent,#34d399);white-space:nowrap;}
+.fl-tx{flex:1;font-size:12.5px;line-height:1.55;font-weight:700;color:var(--navy);}
+.fl-go{flex:none;font-size:11px;font-weight:900;color:var(--ink-a);white-space:nowrap;}
+
+
+/* ===== 彙整：自評小項分組（題號對應） ===== */
+.d-group{margin-top:16px;padding-top:13px;border-top:1px dashed color-mix(in srgb,var(--accent,#2f80c4) 30%,#fff);}
+.d-group:first-child{margin-top:0;padding-top:0;border-top:0;}
+.d-sub{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;font-weight:700;
+  line-height:1.6;color:var(--navy);margin-bottom:9px;}
+.d-no{flex:none;min-width:24px;height:22px;padding:0 6px;border-radius:7px;background:var(--accent,#2f80c4);color:#fff;
+  font-family:var(--font-en);font-size:11.5px;font-weight:700;display:inline-grid;place-items:center;
+  box-shadow:0 2px 6px color-mix(in srgb,var(--accent,#2f80c4) 35%,transparent);}
+.d-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+
+/* ===== 收納式數據表（點擊展開，含進場動畫） ===== */
+.tbl{margin-top:11px;}
+.tmore{width:100%;display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;cursor:pointer;text-align:left;
+  padding:10px 12px;border-radius:13px;font-size:12.5px;font-weight:700;color:var(--navy);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent,#2f80c4) 13%,#fff),color-mix(in srgb,var(--accent,#2f80c4) 4%,#fff));
+  border:1px solid color-mix(in srgb,var(--accent,#2f80c4) 28%,#fff);
+  transition:transform .2s,box-shadow .25s,background .25s;}
+.tmore:hover{transform:translateY(-1px);box-shadow:0 7px 18px color-mix(in srgb,var(--accent,#2f80c4) 22%,transparent);}
+.tmore.open{background:linear-gradient(135deg,color-mix(in srgb,var(--accent,#2f80c4) 20%,#fff),color-mix(in srgb,var(--accent,#2f80c4) 7%,#fff));}
+.tm-ic{flex:none;color:var(--accent,#2f80c4);font-size:13px;line-height:1.55;}
+.tm-tx{flex:1 1 150px;line-height:1.55;}
+.tm-go{flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--accent,#2f80c4);white-space:nowrap;}
+.tm-go .caret{font-style:normal;transition:transform .3s;}
+.tmore.open .tm-go .caret{transform:rotate(180deg);}
+.tbl-body{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.22,.9,.3,1);}
+.tbl-inner{padding-top:10px;}
+.tbl-body .dtable-scroll{opacity:0;transform:translateY(12px) scale(.985);
+  transition:opacity .45s ease .06s,transform .5s cubic-bezier(.22,.9,.3,1) .06s;}
+.tbl-body.open .dtable-scroll{opacity:1;transform:none;}
+.tbl-body.open tbody tr{animation:rowIn .5s cubic-bezier(.22,.9,.3,1) both;
+  animation-delay:calc(var(--r,0) * 45ms + .12s);}
+@keyframes rowIn{from{opacity:0;transform:translateX(-12px);filter:blur(2px);}to{opacity:1;transform:none;filter:none;}}
+.tbl-body.open thead th{position:relative;overflow:hidden;}
+.tbl-body.open thead th::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.9) 50%,transparent 65%);
+  transform:translateX(-130%);animation:thSheen 1.1s ease .18s 1;}
+@keyframes thSheen{to{transform:translateX(130%);}}
+@media (prefers-reduced-motion:reduce){
+  .tbl-body.open tbody tr,.tbl-body.open thead th::after{animation:none;}
+  .tbl-body .dtable-scroll{transition:none;opacity:1;transform:none;}
+}
+
+.ag-sub{display:block;margin-top:4px;font-size:12px;font-weight:500;line-height:1.6;opacity:.88;}
+.d-group .card-files,.d-group .card-links{margin-top:10px;}
+
+/* 重點／數據標示 */
+.hl{display:inline;color:#c62828;font-weight:700;
+  background:linear-gradient(transparent 60%,rgba(255,214,0,.38) 60%);
+  padding:0 1.5px;border-radius:2px;}
+.sec-intro .hl,.ai-card .hl{color:#c62828;}

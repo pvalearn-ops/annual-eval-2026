@@ -467,18 +467,43 @@ const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt
 const panel = document.getElementById('panel');
 const backdrop = document.getElementById('panel-backdrop');
 
+// 重點標示：**手動標記** 與 數據（數字＋單位／百分比／金額）自動標示
+const RE_PCT = /(\d[\d,]*(?:\.\d+)?\s*(?:％|%))/g;
+const RE_MONEY = /(\d{1,3}(?:,\d{3})+\s*元)/g;
+const RE_UNIT = /(\d[\d,]*(?:\.\d+)?\s*(?:場次|座數|件數|人次|座|件|家|台|項|份|則|人|次|天|筆|冊))/g;
+function hl(t) {
+  return String(t)
+    .replace(/\*\*([^*]+)\*\*/g, '<span class="hl">$1</span>')
+    .replace(RE_PCT, '<span class="hl">$1</span>')
+    .replace(RE_MONEY, '<span class="hl">$1</span>')
+    .replace(RE_UNIT, '<span class="hl">$1</span>');
+}
+const esch = (s) => hl(esc(s));
+
 function renderStats(sec) {
   if (!sec.stats) return '';
   return `<div class="chips">${sec.stats.map((s) => `<div class="chip"><b>${esc(s.value)}<i>${esc(s.unit || '')}</i></b><span>${esc(s.label)}</span></div>`).join('')}</div>`;
 }
-function renderTables(sec) {
-  if (!sec.tables) return '';
-  return sec.tables.map((t) => `<div class="dtable-wrap"><div class="dtable-title">${esc(t.title)}</div><div class="dtable-scroll"><table class="dtable"><thead><tr>${t.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${t.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`).join('');
+function renderTables(secOrTables) {
+  const list = Array.isArray(secOrTables) ? secOrTables : (secOrTables && secOrTables.tables);
+  if (!list || !list.length) return '';
+  return list.map((t) => `<div class="tbl"><button class="tmore" type="button"><span class="tm-ic">▦</span><span class="tm-tx">${esc(t.title)}</span><span class="tm-go">展開表格 <i class="caret">▾</i></span></button><div class="tbl-body"><div class="tbl-inner"><div class="dtable-scroll"><table class="dtable"><thead><tr>${t.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${t.rows.map((r, i) => `<tr style="--r:${i}">${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div></div></div>`).join('');
+}
+function renderDetailInner(d) {
+  if (Array.isArray(d)) {
+    const isGroup = (x) => x && typeof x === 'object';
+    if (!d.some(isGroup)) return `<ul class="d-list">${d.map((x) => `<li>${esch(x)}</li>`).join('')}</ul>`;
+    return d.map((x) => {
+      if (!isGroup(x)) return `<ul class="d-list"><li>${esch(x)}</li></ul>`;
+      const pts = (x.points || []).map((y) => `<li>${esch(y)}</li>`).join('');
+      return `<div class="d-group"><h4 class="d-sub">${x.no ? `<span class="d-no">${esc(x.no)}</span>` : ''}${esc(x.sub || '')}</h4>${pts ? `<ul class="d-list">${pts}</ul>` : ''}${renderTables(x.tables)}${renderLinks(x.links)}${renderFiles(x.files)}</div>`;
+    }).join('');
+  }
+  return `<p>${esch(d)}</p>`;
 }
 function renderDetail(d) {
   if (!d) return '';
-  const inner = Array.isArray(d) ? `<ul>${d.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p>${esc(d)}</p>`;
-  return `<button class="more" type="button">展開詳情 <span class="caret">▾</span></button><div class="detail"><div class="detail-inner">${inner}</div></div>`;
+  return `<button class="more" type="button">展開詳情 <span class="caret">▾</span></button><div class="detail"><div class="detail-inner">${renderDetailInner(d)}</div></div>`;
 }
 function renderImgs(grp, imgs) {
   if (!imgs || !imgs.length) return '';
@@ -500,10 +525,10 @@ function renderFiles(files) {
   return `<div class="card-files">${files.map((f) => `<a class="file-link" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer"><span class="fl-ic">📄</span><span class="fl-tx">${esc(f.title)}</span><span class="fl-go">開啟 PDF ↗</span></a>`).join('')}</div>`;
 }
 function renderBody(sec) {
-  if (sec.type === 'list') return `<ol class="list">${sec.items.map((it) => `<li><h3>${esc(it.heading)}</h3><p>${esc(it.text)}</p>${renderDetail(it.detail)}</li>`).join('')}</ol>`;
+  if (sec.type === 'list') return `<ol class="list">${sec.items.map((it) => `<li><h3>${esc(it.heading)}</h3><p>${esch(it.text)}</p>${renderDetail(it.detail)}${renderTables(it.tables)}${renderLinks(it.links)}${renderFiles(it.files)}</li>`).join('')}</ol>`;
   if (sec.type === 'ai') {
     const line = sec.typewriter ? `<div class="ai-line">${esc(sec.typewriter)}</div>` : '';
-    return line + renderBanner(sec) + `<div class="ai-grid">${sec.cards.map((c, j) => (c.group ? `<h3 class="ai-group">${esc(c.group)}</h3>` : '') + `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b><p>${esc(c.desc)}</p>${renderDetail(c.detail)}${renderImgs(sec.id + '-' + j, c.images)}${renderLinks(c.links)}${renderFiles(c.files)}</div>`).join('')}</div>`;
+    return line + renderBanner(sec) + `<div class="ai-grid">${sec.cards.map((c, j) => (c.group ? `<h3 class="ai-group">${esc(c.group)}${c.groupSub ? `<span class="ag-sub">${esc(c.groupSub)}</span>` : ''}</h3>` : '') + `<div class="ai-card"><div class="ic">${esc(c.icon)}</div><b>${esc(c.title)}</b><p>${esch(c.desc)}</p>${renderDetail(c.detail)}${renderImgs(sec.id + '-' + j, c.images)}${renderLinks(c.links)}${renderFiles(c.files)}</div>`).join('')}</div>`;
   }
   return '';
 }
@@ -514,7 +539,7 @@ function openPanel(id) {
   document.getElementById('panel-en').textContent = sec.en;
   document.getElementById('panel-en').style.color = ACCENTS[id];
   document.getElementById('panel-title').textContent = sec.name;
-  document.getElementById('panel-intro').textContent = sec.intro;
+  document.getElementById('panel-intro').innerHTML = esch(sec.intro);
   document.getElementById('panel-body').innerHTML = renderStats(sec) + renderTables(sec) + renderBody(sec);
   panel.classList.remove('hidden'); backdrop.classList.remove('hidden');
   controls.autoRotate = false;
@@ -527,12 +552,36 @@ document.getElementById('panel-close').addEventListener('click', closePanel);
 backdrop.addEventListener('click', closePanel);
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
 
-// 展開 / 收合
+// 展開 / 收合（高度自動量測，巢狀展開不會被裁切）
+function slideOpen(el) {
+  el.style.maxHeight = el.scrollHeight + 'px';
+  el.classList.add('open');
+  const done = (ev) => {
+    if (ev.target !== el || ev.propertyName !== 'max-height') return;
+    el.style.maxHeight = 'none';
+    el.removeEventListener('transitionend', done);
+  };
+  el.addEventListener('transitionend', done);
+}
+function slideClose(el) {
+  el.style.maxHeight = el.scrollHeight + 'px';
+  el.classList.remove('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => { el.style.maxHeight = '0px'; }));
+}
 document.getElementById('panel-body').addEventListener('click', (e) => {
+  const tbtn = e.target.closest('.tmore');
+  if (tbtn) {
+    const body = tbtn.nextElementSibling;
+    const on = tbtn.classList.toggle('open');
+    if (on) slideOpen(body); else slideClose(body);
+    tbtn.querySelector('.tm-go').firstChild.textContent = on ? '收合表格 ' : '展開表格 ';
+    return;
+  }
   const btn = e.target.closest('.more');
   if (!btn) return;
   const d = btn.nextElementSibling;
-  const open = btn.classList.toggle('open'); d.classList.toggle('open', open);
+  const open = btn.classList.toggle('open');
+  if (open) slideOpen(d); else slideClose(d);
   btn.firstChild.textContent = open ? '收合詳情 ' : '展開詳情 ';
 });
 
