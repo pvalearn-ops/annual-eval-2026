@@ -225,17 +225,54 @@ if (location.protocol === 'file:') {
 let modelsLoadedCount = 0;
 const TOTAL_GLB_MODELS = 3; // boiler.glb, crane.glb, factory.glb
 
-function onModelLoaded() {
-  modelsLoadedCount++;
-  const pct = Math.min(Math.round((modelsLoadedCount / TOTAL_GLB_MODELS) * 100), 100);
-  
+// 各模型的預估大小（位元組），用來換算下載進度；
+// 伺服器啟用 gzip 時 Content-Length 取不到，故以已知大小估算。
+const GLB_SIZES = {
+  'boiler.glb': 2109440,
+  'crane.glb': 2784744,
+  'factory.glb': 2767900,
+};
+const glbProgress = {}; // 檔名 -> 0~1
+
+function glbKey(url) { return String(url).split('/').pop(); }
+
+function updateLoaderUI() {
+  let sum = 0;
+  Object.keys(GLB_SIZES).forEach((k) => { sum += Math.min(glbProgress[k] || 0, 1); });
+  let pct = Math.round((sum / TOTAL_GLB_MODELS) * 100);
+  if (modelsLoadedCount >= TOTAL_GLB_MODELS) pct = 100;
+  else pct = Math.min(pct, 99);
   const loaderBar = document.getElementById('loader-bar');
   const loaderPct = document.getElementById('loader-pct');
   if (loaderBar) loaderBar.style.width = pct + '%';
   if (loaderPct) loaderPct.textContent = pct + '%';
+}
 
-  // 必須當 3D 模型 100% 全數載入完畢，才淡出載入畫面並呈現首頁
+// 進入場景後若模型還沒到齊，用小提示告知（載完自動消失）
+function setLoadingPill(show) {
+  let pill = document.getElementById('model-pill');
+  if (show) {
+    if (pill) return;
+    pill = document.createElement('div');
+    pill.id = 'model-pill';
+    pill.textContent = '3D 模型載入中…';
+    pill.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(58px + env(safe-area-inset-bottom));' +
+      'z-index:120;padding:7px 15px;border-radius:999px;background:rgba(255,255,255,.92);color:#16394f;' +
+      'border:1px solid rgba(47,128,196,.35);box-shadow:0 6px 18px rgba(0,0,0,.12);font-size:12.5px;font-weight:700;';
+    document.body.appendChild(pill);
+  } else if (pill) {
+    pill.remove();
+  }
+}
+
+function onModelLoaded(url) {
+  modelsLoadedCount++;
+  if (url) glbProgress[glbKey(url)] = 1;
+  updateLoaderUI();
+
+  // 3D 模型全數載入完畢，才淡出載入畫面並呈現首頁
   if (modelsLoadedCount >= TOTAL_GLB_MODELS) {
+    setLoadingPill(false);
     setTimeout(() => {
       const loaderEl = document.getElementById('loader');
       const introEl = document.getElementById('intro');
@@ -263,7 +300,7 @@ function loadGLTFModel(url, targetHeight, shadow = true, onComplete, retryCount 
       setTimeout(() => loadGLTFModel(url, targetHeight, shadow, onComplete, retryCount + 1), 200);
     } else {
       console.warn(`[GLTF Load Error] GLTFLoader 腳本逾時未載入: ${url}`);
-      onModelLoaded(); // 計數累加避免卡死
+      onModelLoaded(url); // 計數累加避免卡死
     }
     return;
   }
@@ -300,12 +337,19 @@ function loadGLTFModel(url, targetHeight, shadow = true, onComplete, retryCount 
       const container = new THREE.Group();
       container.add(model);
       onComplete(container, gltf);
-      onModelLoaded(); // 載入完成通知
+      onModelLoaded(url); // 載入完成通知
     },
-    undefined,
+    (evt) => {
+      const key = glbKey(url);
+      const expect = GLB_SIZES[key] || evt.total || 0;
+      if (expect > 0) {
+        glbProgress[key] = Math.min(evt.loaded / expect, 1);
+        updateLoaderUI();
+      }
+    },
     (err) => {
       console.warn(`[GLTF Load Error] 無法載入模型 ${url}:`, err);
-      onModelLoaded(); // 即使出錯也累加計數避免畫面卡住
+      onModelLoaded(url); // 即使出錯也累加計數避免畫面卡住
     }
   );
 }
@@ -656,14 +700,16 @@ function enter() {
   setTimeout(() => document.getElementById('hint').classList.add('hidden'), 6000);
 }
 document.getElementById('enter-btn').addEventListener('click', enter);
-// 安全備用退場機制（若網路異常，最長 6 秒後強行顯示首頁）
+// 安全備用退場機制：模型合計約 7.5MB，網路較慢時最長等 30 秒，
+// 逾時才強行顯示首頁，並以小提示告知模型仍在背景下載（載完會自動替換造型）。
 setTimeout(() => {
   const loaderEl = document.getElementById('loader');
   if (loaderEl && !loaderEl.classList.contains('hidden')) {
     loaderEl.classList.add('hidden');
     if (document.getElementById('intro')) document.getElementById('intro').classList.remove('hidden');
+    if (modelsLoadedCount < TOTAL_GLB_MODELS) setLoadingPill(true);
   }
-}, 6000);
+}, 30000);
 
 // ============================================================
 //  動畫
