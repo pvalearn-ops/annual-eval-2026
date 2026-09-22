@@ -203,6 +203,25 @@ function makeCloud() {
 }
 
 // ---------- 3D 模型載入進度與完全載入控制 ----------
+// 以 file:// 直接開啟時，瀏覽器的 CORS 政策會擋下本機 .glb 讀取，這裡主動提示
+if (location.protocol === 'file:') {
+  addEventListener('DOMContentLoaded', () => {
+    const tip = document.createElement('div');
+    tip.id = 'file-tip';
+    tip.innerHTML = '<b>3D 模型未載入</b>：瀏覽器禁止 file:// 網頁讀取本機模型檔（.glb）。' +
+      '請改用資料夾內的<b>「啟動網頁.bat」</b>開啟，或部署到 GitHub Pages。' +
+      '<button type="button" aria-label="關閉">✕</button>';
+    tip.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:200;max-width:min(560px,92vw);' +
+      'padding:12px 42px 12px 16px;border-radius:14px;background:rgba(255,248,225,.97);color:#7a4b00;' +
+      'border:1px solid #f0c36d;box-shadow:0 10px 28px rgba(0,0,0,.18);font-size:13px;line-height:1.7;';
+    const btn = tip.querySelector('button');
+    btn.style.cssText = 'position:absolute;top:8px;right:10px;width:26px;height:26px;border-radius:50%;border:none;' +
+      'background:rgba(0,0,0,.07);color:#7a4b00;font-size:13px;cursor:pointer;';
+    btn.addEventListener('click', () => tip.remove());
+    document.body.appendChild(tip);
+  });
+}
+
 let modelsLoadedCount = 0;
 const TOTAL_GLB_MODELS = 3; // boiler.glb, crane.glb, factory.glb
 
@@ -348,6 +367,7 @@ SECTIONS.forEach((sec) => {
 
   if (sec.id === 'report') { targetObj = boiler; targetHeight = 3.6; labelY = 4.2; }
   else if (sec.id === 'merit') { targetObj = trophy; targetHeight = 3.4; labelY = 3.8; }
+  else if (sec.id === 'innovation') { targetObj = robot; targetHeight = 3.4; labelY = 3.9; }
 
   if (targetObj) {
     loadGLTFModel(sec.model, targetHeight, true, (gltfGroup) => {
@@ -548,6 +568,19 @@ function closePanel() {
   panel.classList.add('hidden'); backdrop.classList.add('hidden');
   selected = null; controls.autoRotate = true;
 }
+// 桌機：放大／還原閱讀寬度（設定會記住）
+const panelEl = document.getElementById('panel');
+const expandBtn = document.getElementById('panel-expand');
+function setWide(on) {
+  panelEl.classList.toggle('wide', on);
+  expandBtn.textContent = on ? '⤡' : '⤢';
+  expandBtn.title = on ? '還原寬度' : '放大閱讀';
+  expandBtn.setAttribute('aria-label', expandBtn.title);
+  try { localStorage.setItem('panelWide', on ? '1' : '0'); } catch (err) { /* 無痕模式略過 */ }
+}
+try { if (localStorage.getItem('panelWide') === '1') setWide(true); } catch (err) { /* 略過 */ }
+expandBtn.addEventListener('click', () => setWide(!panelEl.classList.contains('wide')));
+
 document.getElementById('panel-close').addEventListener('click', closePanel);
 backdrop.addEventListener('click', closePanel);
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });

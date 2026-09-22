@@ -72,9 +72,22 @@ body{position:fixed;inset:0;}
 #panel{left:0;right:0;bottom:0;max-height:84vh;border-radius:22px 22px 0 0;transform:translateY(101%);
   padding:26px 20px calc(24px + env(safe-area-inset-bottom));}
 #panel:not(.hidden){transform:translateY(0);}
-@media(min-width:820px){#panel{left:auto;top:0;bottom:0;right:0;width:480px;max-height:none;border-radius:22px 0 0 22px;
-  transform:translateX(101%);padding:40px 32px;}#panel::before{width:5px;height:auto;top:0;bottom:0;left:0;right:auto;}
-  #panel:not(.hidden){transform:translateX(0);}}
+@media(min-width:820px){#panel{left:auto;top:0;bottom:0;right:0;width:clamp(460px,46vw,900px);max-height:none;
+  border-radius:22px 0 0 22px;transform:translateX(101%);padding:40px 32px;
+  transition:transform .5s cubic-bezier(.2,.85,.2,1),opacity .4s,width .4s cubic-bezier(.2,.85,.2,1);}
+  #panel::before{width:5px;height:auto;top:0;bottom:0;left:0;right:auto;}
+  #panel:not(.hidden){transform:translateX(0);}
+  /* 放大閱讀模式（桌機限定） */
+  #panel.wide{width:min(1280px,94vw);}
+  #panel #panel-expand{display:grid;}
+  #panel .chips{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+  .panel-head,#panel-body{width:100%;max-width:1040px;margin-left:auto;margin-right:auto;}
+}
+@media(min-width:1600px){#panel{width:clamp(560px,44vw,1040px);}}
+#panel-expand{position:absolute;top:15px;right:61px;z-index:2;width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--line);background:var(--sky-1);color:var(--navy);font-size:15px;cursor:pointer;
+  display:none;place-items:center;transition:background .2s;}
+#panel-expand:hover{background:var(--sky-2);}
 #panel-close{position:absolute;top:15px;right:15px;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
   background:var(--sky-1);color:var(--navy);font-size:16px;cursor:pointer;}
 #panel-close:hover{background:var(--sky-2);}
@@ -143,7 +156,7 @@ body{position:fixed;inset:0;}
 .lightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;
   background:rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer;}
 .lightbox .lb-prev{left:12px;}.lightbox .lb-next{right:12px;}
-@media(min-width:820px){.ai-grid{grid-template-columns:1fr 1fr;}}
+@media(min-width:820px){#panel .ai-grid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));}}
 
 /* ===== 創新作為：主題橫幅 / 分組標題 / 外部連結 / PDF 附件 =====
    註：#panel 為白底淺色面板，文字一律使用深色。--accent 在「創新作為」是淺綠
