@@ -28,11 +28,42 @@ const SECTIONS = [
     color: '#38bdf8',
     shape: 'capsule',
     intro: '115年度代行檢查機構工作績效自我評鑑表（代檢機構名稱：社團法人中華產業機械設備協會），考評期間 114年7月1日至115年6月30日，涵蓋代行檢查之設備、代檢業務之管理、人員之管理、經費收支、財產管理及其他必要事項等六大面向。各大項下方完整呈現原報告之各項統計表，並附對應之附件／附表 PDF 連結。',
-    stats: [
-      { label: '申請檢查案', value: '35,041', unit: '件' },
-      { label: '新增列管設備', value: '1,690', unit: '座' },
-      { label: '數位掃描達成率', value: '100', unit: '%' },
-      { label: '公文平均辦理', value: '0.53', unit: '天' },
+    // 重點數據跑馬燈：value/unit/label 為卡片內容，to 為「大項-小項」，點擊即跳至該處
+    ticker: [
+      { value: '35,041', unit: '件', label: '申請檢查案', to: '2-4' },
+      { value: '1,690', unit: '座', label: '新增列管設備', to: '1-2' },
+      { value: '100', unit: '%', label: '數位掃描達成率', to: '1-3' },
+      { value: '0.53', unit: '天', label: '公文平均辦理', to: '2-7' },
+      { value: '162', unit: '件', label: '量測儀器外校', to: '1-1' },
+      { value: '185', unit: '件', label: '量測儀器內校', to: '1-1' },
+      { value: '137', unit: '座', label: '替代檢查及一壓併高特核備', to: '1-2' },
+      { value: '1,671', unit: '座', label: '使用狀況異動核備', to: '1-2' },
+      { value: '5', unit: '則', label: '聯合網站更新訊息', to: '1-4' },
+      { value: '107', unit: '件', label: '交辦事項辦理', to: '2-1' },
+      { value: '12', unit: '件', label: '監督管理稽核', to: '2-2' },
+      { value: '11', unit: '件', label: '代檢業務稽核缺失', to: '2-3' },
+      { value: '535', unit: '件', label: '合格證補換發', to: '2-4' },
+      { value: '1,152', unit: '件', label: '多元繳費案件', to: '2-4' },
+      { value: '1,478', unit: '座', label: '申報停用', to: '2-6' },
+      { value: '284', unit: '座', label: '逾期未檢函報', to: '2-6' },
+      { value: '6', unit: '座', label: '逾期尚未申請', to: '2-6' },
+      { value: '3,466', unit: '件', label: '一般公文', to: '2-7' },
+      { value: '185', unit: '場次', label: '主管內稽督導', to: '3-1' },
+      { value: '270', unit: '座', label: 'RT 底片抽查', to: '3-5' },
+      { value: '99.25', unit: '%', label: 'RT 抽查合格率', to: '3-5' },
+      { value: '852', unit: '件', label: 'GPS 暨穿戴查核', to: '3-6' },
+      { value: '1', unit: '件', label: 'GPS 查核異常', to: '3-6' },
+      { value: '99.62', unit: '%', label: '114 年度收入達成', to: '4-1' },
+      { value: '99.56', unit: '%', label: '114 年度支出達成', to: '4-1' },
+      { value: '119.73', unit: '%', label: '115 上半年收入達成', to: '4-1' },
+      { value: '0', unit: '項', label: '經費送審主要缺失', to: '4-2' },
+      { value: '2,007', unit: '件', label: '年度財產盤點', to: '5-2' },
+      { value: '20', unit: '件', label: '法令研修提案', to: '6-1' },
+      { value: '100', unit: '%', label: '滿意度整體正面評價', to: '6-2' },
+      { value: '16', unit: '件', label: '事業單位反映意見', to: '6-4' },
+      { value: '7', unit: '場次', label: '辦理宣導會', to: '6-5' },
+      { value: '12', unit: '場次', label: '辦理教育訓練', to: '6-5' },
+      { value: '17', unit: '項', label: '前次考評缺失已改善', to: '6-6' },
     ],
     items: [
       // ── 一、代行檢查之設備 ──
@@ -194,7 +225,7 @@ const SECTIONS = [
           },
           {
             no: '4',
-            sub: '查申請書收件及管理情形',
+            sub: '檢查申請書收件及管理情形',
             points: [
               '4-1　各項作業皆依勞動部訂定之危險性機械設備申請案檢查作業程序所訂流程進行收件及管理；114年7月至115年6月申請檢查案共計 35,041 件，資料使用（影印／調閱）85 件，合格證補換發共計 535 件。',
               '4-2　事前檢查：由收件人員辦理收件（採電腦系統分派代檢員），受案代檢員依檢查案檢附審核表逐項核對事業單位檢附書面資料，不符者通知補件，資料符合者通知繳費，收費完成後安排檢查日期通知事業單位。',
@@ -642,6 +673,7 @@ const SECTIONS = [
       // ===== 一、品質管理與檢驗稽核作業 =====
       {
         group: '一、品質管理與檢驗稽核作業 🛡️',
+        groupImg: 'assets/images/merit/m1.jpg',
         groupSub: '展現機構維持高標準檢驗品質、落實法規要求及嚴格把關之核心價值。',
         icon: '🛡️',
         title: '[1] 維持國際認證與品質達標',
@@ -656,6 +688,7 @@ const SECTIONS = [
       // ===== 二、協助主管機關與專案輔導 =====
       {
         group: '二、協助主管機關與專案輔導 🤝',
+        groupImg: 'assets/images/merit/m2.jpg',
         groupSub: '展現機構作為主管機關（特別是中區職安中心）強力後盾的角色，積極參與輔導、查驗與行政協助。',
         icon: '🤝',
         title: '[3] 專案輔導',
@@ -668,7 +701,7 @@ const SECTIONS = [
       },
       {
         icon: '🤝',
-        title: '[5] 設備建檔',
+        title: '[5] 整理名冊資料',
         desc: '配合整理及提供新設液化石油氣儲槽名冊。',
       },
       {
@@ -715,6 +748,7 @@ const SECTIONS = [
       // ===== 三、辦理教育訓練、宣導與觀摩會（對外推廣） =====
       {
         group: '三、辦理教育訓練、宣導與觀摩會（對外推廣） 📣',
+        groupImg: 'assets/images/merit/m3.jpg',
         groupSub: '展現機構在提升業界安全意識、建立作業共識與推廣自主管理制度的努力。',
         icon: '📣',
         title: '[14] 制度建立研習',
@@ -759,6 +793,7 @@ const SECTIONS = [
       // ===== 四、內部專業培訓與健康職場營造（對內發展） =====
       {
         group: '四、內部專業培訓與健康職場營造（對內發展） 🧑‍🏫',
+        groupImg: 'assets/images/merit/m4.jpg',
         groupSub: '展現機構重視員工專業能力成長、工作品質要求以及員工身心健康。',
         icon: '🧑‍🏫',
         title: '[22] 檢查員專業精進',
@@ -778,6 +813,7 @@ const SECTIONS = [
       // ===== 五、數位轉型與資訊系統優化 =====
       {
         group: '五、數位轉型與資訊系統優化 💻',
+        groupImg: 'assets/images/merit/m5.jpg',
         groupSub: '展現機構在推動無紙化、優化使用者體驗及導入創新科技方面的卓越成果。',
         icon: '💻',
         title: '[25] 推動多元繳費與線上申辦',
@@ -827,18 +863,20 @@ const SECTIONS = [
     color: '#34d399',
     shape: 'gear',
     intro: '本會 115 年度延續「人工智慧（AI）創新」主軸，以「AI 代理人（AI Agent）— 全方位 AI 賦能與數位轉型」為主題，於檢查、輔導、教育訓練、宣導行銷、跨機關合作、法規制度六大面向提出創新作為與績效。點圖可放大檢視，附件可直接開啟 PDF。',
-    banner: { img: 'assets/images/innov2026/overview.jpg', caption: '全方位 AI 賦能與數位轉型創新成果總覽' },
-    typewriter: '「AI Agent 具備自主規劃、資訊蒐集、資料分析、跨系統整合及任務執行能力，讓人工智慧成為輔助的第二雙手。」',
-    stats: [
-      { label: '全方位 AI 賦能', value: '7', unit: '大項' },
-      { label: '職安宣導影片', value: '20', unit: '+部' },
-      { label: '社群播送', value: '34', unit: '件' },
-      { label: 'PDF 佐證附件', value: '16', unit: '份' },
+    // 七大面向跑馬燈：點卡片跳至該面向
+    ticker: [
+      { icon: '🤖', title: '一、全方位 AI 賦能與數位轉型', note: '解釋令檢索、社群營運、自動化工具等 7 大項', to: 'innovation-f1' },
+      { icon: '🔭', title: '二、以「檢查」方面', note: '旋轉盤雷射測距儀開發、荷重表智慧判讀（共 2 項）', to: 'innovation-f2' },
+      { icon: '🤝', title: '三、以「輔導」方面', note: '型式製造廠溝通平台、智慧數位助理平台（共 2 項）', to: 'innovation-f3' },
+      { icon: '🎓', title: '四、以「教育訓練」方面', note: '安全閥配管、測厚儀、腐蝕態樣等技術研討（共 8 項）', to: 'innovation-f4' },
+      { icon: '📣', title: '五、以「宣導行銷」方面', note: '年刊投稿 3 篇，推廣法規緣由與新技術（共 3 項）', to: 'innovation-f5' },
+      { icon: '🛡️', title: '六、以「跨機關合作」方面', note: '投稿工業安全期刊：雙 AI 引擎鋼印防偽辨識（共 1 項）', to: 'innovation-f6' },
+      { icon: '⚖️', title: '七、以「法規制度」方面', note: '提案修正達成檢查標準化（機械 11 件、設備 9 件）', to: 'innovation-f7' },
     ],
     cards: [
       // ===== 二、全方位AI賦能與數位轉型 =====
       {
-        group: '二、以「全方位 AI 賦能與數位轉型」方面（陳宜左‧共 7 大項）',
+        group: '一、以「全方位 AI 賦能與數位轉型」方面（共 7 大項）',
         icon: '🔎',
         title: '（一）優化版解釋令智慧整合與檢索系統',
         desc: '延續 113 年建置之 AI 查詢機制並持續維護更新，本年度導入 NotebookLM 進行資料智慧彙整，輸入關鍵字即可即時獲取精準規範。（共 1 件）',
@@ -849,7 +887,6 @@ const SECTIONS = [
         ],
         images: [
           { img: 'assets/images/innov2026/f01a.png', caption: '圖1 優化版危險性設備及機械解釋令整合專員' },
-          { img: 'assets/images/innov2026/f01qr.png', caption: '圖1-QR 解釋令整合專員（NotebookLM）行動入口' },
         ],
         links: [
           { label: '解釋令整合專員（NotebookLM）', url: 'https://notebook.google.com/notebook/f4789d18-6213-45fb-ae30-9a65f2b7edab?pli=1' },
@@ -867,9 +904,7 @@ const SECTIONS = [
         ],
         images: [
           { img: 'assets/images/innov2026/f02a.png', caption: '圖2 中華產業機械設備協會 代檢組 YouTube 平台' },
-          { img: 'assets/images/innov2026/f02qr.png', caption: '圖2-QR YouTube 頻道行動入口' },
           { img: 'assets/images/innov2026/f03a.png', caption: '圖3 危險性機械及設備代行檢查機構 Facebook 平台' },
-          { img: 'assets/images/innov2026/f03qr.png', caption: '圖3-QR Facebook 粉絲專頁行動入口' },
           { img: 'assets/images/innov2026/f04.png', caption: '圖4 Facebook 平台 AI 自動發文' },
         ],
         links: [
@@ -907,7 +942,6 @@ const SECTIONS = [
           { img: 'assets/images/innov2026/f08.png', caption: '圖8 Google 擴展 自動填入工具' },
           { img: 'assets/images/innov2026/f09.png', caption: '圖9 Google 擴展 事前檢查派件工具' },
           { img: 'assets/images/innov2026/f10a.png', caption: '圖10 工作指派單擴展功能' },
-          { img: 'assets/images/innov2026/f10qr.png', caption: '圖10-QR 工作指派單擴展功能行動入口' },
           { img: 'assets/images/innov2026/f11.png', caption: '圖11 掃描檔案智能命名（Python）' },
           { img: 'assets/images/innov2026/f12.png', caption: '圖12 通知單自動寄送與智能化分類' },
           { img: 'assets/images/innov2026/f13.png', caption: '圖13 定期檢查自動收件系統' },
@@ -970,7 +1004,6 @@ const SECTIONS = [
         ],
         images: [
           { img: 'assets/images/innov2026/f25a.png', caption: '圖25 工安主題音樂 MV' },
-          { img: 'assets/images/innov2026/f25qr.png', caption: '圖25-QR 工安主題 MV 觀看入口' },
           { img: 'assets/images/innov2026/f26.png', caption: '圖26 AI 應用規劃師（初級）證書' },
         ],
         links: [
@@ -986,7 +1019,7 @@ const SECTIONS = [
 
       // ===== 三、檢查 =====
       {
-        group: '三、以「檢查」方面（共 2 項）',
+        group: '二、以「檢查」方面（共 2 項）',
         icon: '📏',
         title: '（一）旋轉盤間隙檢測雷射測距儀開發',
         desc: '〔陳宜左〕將生成式 AI 視為「研發顧問」，完成從結構機構、實體電路到嵌入式軟體之全流程原型機開發，並以 3D 列印產製專用外殼。',
@@ -1019,7 +1052,7 @@ const SECTIONS = [
 
       // ===== 四、輔導 =====
       {
-        group: '四、以「輔導」方面（共 2 項）',
+        group: '三、以「輔導」方面（共 2 項）',
         icon: '💬',
         title: '（一）擴充製造設施型式檢查製造廠溝通平台功能',
         desc: '〔莊忠儒〕以「中部地區型式製造廠檢查資訊交流平台」LINE 群組即時互動，定期更新「熔接與構造明細表檢視表」及「危險性設備型式檢查製造廠製造能力清單」。',
@@ -1057,6 +1090,9 @@ const SECTIONS = [
           { img: 'assets/images/innov2026/f33.png', caption: '圖33 型式合格廠商製造能力及委外製作、熔接構造檢查檢視表' },
           { img: 'assets/images/innov2026/f34.png', caption: '圖34 高壓氣體容器有效期限計算小工具' },
         ],
+        links: [
+          { label: '智慧數位助理平台（線上入口）', url: 'https://b33598.wixstudio.com/my-site' },
+        ],
         files: [
           { title: '附件2　優化智慧數位助理平台資源利用率 [陳聖凱]', url: 'assets/attachments/att02.pdf' },
         ],
@@ -1064,7 +1100,7 @@ const SECTIONS = [
 
       // ===== 五、教育訓練 =====
       {
-        group: '五、以「教育訓練」方面（共 8 項）　※ 於月組務會議後辦理內部技術研討在職訓練，受課後線上測試，合格者符合代行檢查機構作業要點第十九點在職訓練時數',
+        group: '四、以「教育訓練」方面（共 8 項）　※ 於月組務會議後辦理內部技術研討在職訓練，受課後線上測試，合格者符合代行檢查機構作業要點第十九點在職訓練時數',
         icon: '🔥',
         title: '（一）鍋爐及壓力容器安全閥配管規定安全宣導',
         desc: '〔莊忠儒〕使代檢員瞭解鍋爐及壓力容器安全閥配管相關規定、配管原理與安全性影響。',
@@ -1157,7 +1193,7 @@ const SECTIONS = [
 
       // ===== 六、宣導行銷 =====
       {
-        group: '六、以「宣導行銷」方面（共 3 項）',
+        group: '五、以「宣導行銷」方面（共 3 項）',
         icon: '📰',
         title: '（一）投稿本會年刊－對於 EN 12159 防止人員受困兩門間規定之研究',
         desc: '〔洪政偉〕加強宣導讓安裝營建用升降機的廠商了解規定緣由，避免乘場地板與車廂間水平間距產生的「致命空隙」威脅作業人員生命安全。',
@@ -1185,7 +1221,7 @@ const SECTIONS = [
 
       // ===== 七、跨機關合作 =====
       {
-        group: '七、以「跨機關合作」方面（共 1 項）',
+        group: '六、以「跨機關合作」方面（共 1 項）',
         icon: '🛡️',
         title: '（一）投稿工業安全期刊－危險性機械雙 AI 引擎架鋼印防偽辨識系統研究',
         desc: '〔陳宜左〕導入前端影像強化（抗鏽蝕二值化）與「Vision 幾何量測 + Gemini 視覺特徵」雙 AI 引擎，建立客觀數據導向的防偽稽核機制。',
@@ -1199,14 +1235,14 @@ const SECTIONS = [
 
       // ===== 八、法規制度 =====
       {
-        group: '八、以「法規制度」方面（機械組提 11 件、設備組提 9 件）',
+        group: '七、以「法規制度」方面（機械組提 11 件、設備組提 9 件）',
         icon: '⚖️',
         title: '法規制度提案修正相關內容及績效',
         desc: '將疑義規則於協會月會組務會議提出討論，經代行檢查技術委員及代行檢查業務聯席會討論後得出統一性決議，成為受檢單位與檢查機構檢查尺度之依據，達到檢查標準化模式。',
         detail: [
           '（一）機械組 法規制度提案修正相關內容及績效〔何國銓〕（與考評第 1 部分六.1 內容相同）。',
           '（二）設備組 法規制度提案修正相關內容及績效〔廖昌東〕（與考評第 1 部分六.1 內容相同）。',
-          '本次考評期間機械類共提案 10 件，設備類共提案 8 件。',
+          '本次考評期間機械類共提案 11 件，設備類共提案 9 件。',
         ],
         files: [
           { title: '附件15　機械組 法規制度提案修正相關內容及績效 [何國銓]', url: 'assets/attachments/att15.pdf' },
