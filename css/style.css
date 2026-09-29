@@ -304,3 +304,6 @@ body{position:fixed;inset:0;}
   text-shadow:0 2px 10px rgba(0,0,0,.55);}
 .ai-group-hero .ag-sub{display:block;margin-top:6px;color:rgba(255,255,255,.92);font-size:12px;
   font-weight:500;line-height:1.7;opacity:1;text-shadow:0 1px 8px rgba(0,0,0,.6);}
+
+/* 純紅字強調（##文字##），不加黃色螢光 */
+.hl.hl-plain{background:none;padding:0;}

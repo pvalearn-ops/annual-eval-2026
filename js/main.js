@@ -537,6 +537,7 @@ const RE_MONEY = /(\d{1,3}(?:,\d{3})+\s*元)/g;
 const RE_UNIT = /(\d[\d,]*(?:\.\d+)?\s*(?:場次|座數|件數|人次|座|件|家|台|項|份|則|人|次|天|筆|冊))/g;
 function hl(t) {
   return String(t)
+    .replace(/##([^#]+)##/g, '<span class="hl hl-plain">$1</span>')
     .replace(/\*\*([^*]+)\*\*/g, '<span class="hl">$1</span>')
     .replace(RE_PCT, '<span class="hl">$1</span>')
     .replace(RE_MONEY, '<span class="hl">$1</span>')

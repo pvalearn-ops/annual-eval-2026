@@ -13,6 +13,7 @@ const RE_MONEY = /(\d{1,3}(?:,\d{3})+\s*元)/g;
 const RE_UNIT = /(\d[\d,]*(?:\.\d+)?\s*(?:場次|座數|件數|人次|座|件|家|台|項|份|則|人|次|天|筆|冊))/g;
 function hl(t) {
   return String(t)
+    .replace(/##([^#]+)##/g, '<span class="hl hl-plain">$1</span>')
     .replace(/\*\*([^*]+)\*\*/g, '<span class="hl">$1</span>')
     .replace(RE_PCT, '<span class="hl">$1</span>')
     .replace(RE_MONEY, '<span class="hl">$1</span>')
@@ -25,9 +26,37 @@ const IMG_GROUPS = {};
 
 // ---- HERO 3D 快捷按鈕 ----
 const heroNav = document.querySelector('.hero-nav');
-heroNav.innerHTML = SECTIONS
+const DOC_ACCENTS = ['#0f9d7a', '#7c5cd6'];
+const mainBtns = SECTIONS
   .map((s, i) => `<a class="btn3d" href="#${s.id}" style="--a:${ACCENTS[i]}"><span class="b3-ic">${ICONS[i]}</span>${esc(s.name)}</a>`)
   .join('');
+const docBtns = (SITE.docs || [])
+  .map((d, i) => `<a class="btn3d btn-doc" href="${esc(d.url)}" target="_blank" rel="noopener noreferrer" style="--a:${DOC_ACCENTS[i % DOC_ACCENTS.length]}"><span class="b3-ic">${esc(d.icon || '📄')}</span>${esc(d.label)}</a>`)
+  .join('');
+
+heroNav.innerHTML = docBtns
+  ? `<span class="hero-stack">` +
+      `<span class="hero-swap hero-main" id="heroMain">${mainBtns}</span>` +
+      `<span class="hero-swap hero-docs hide" id="heroDocs">${docBtns}</span>` +
+    `</span>` +
+    `<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="heroDocs" aria-label="切換報告下載" title="切換報告下載"><span>›</span></button>`
+  : mainBtns;
+
+// ---- 首頁「›」：三個主按鈕與兩個報告下載鈕互相切換（版面不位移）----
+const navToggle = heroNav.querySelector('.nav-toggle');
+const heroMain = heroNav.querySelector('.hero-main');
+const heroDocs = heroNav.querySelector('.hero-docs');
+if (navToggle && heroMain && heroDocs) {
+  navToggle.addEventListener('click', () => {
+    const open = heroDocs.classList.contains('hide'); // 目前是收合 → 要展開
+    heroDocs.classList.toggle('hide', !open);
+    heroMain.classList.toggle('hide', open);
+    navToggle.classList.toggle('open', open);
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    navToggle.title = open ? '返回主選單' : '切換報告下載';
+    navToggle.setAttribute('aria-label', navToggle.title);
+  });
+}
 
 if (matchMedia('(hover:hover)').matches) {
   heroNav.querySelectorAll('.btn3d').forEach((btn) => {
