@@ -801,7 +801,7 @@ document.getElementById('intro-sub').textContent = SITE.subtitle;
 document.getElementById('enter-label').textContent = '進入工廠';
 document.querySelector('#topbar .topbar-title').textContent = SITE.title;
 document.getElementById('hint').textContent = '拖曳可旋轉工廠 ·  點設備看內容';
-const tagEl = document.querySelector('.intro-tag'); if (tagEl) tagEl.textContent = '3D 互動工廠 · TAP TO EXPLORE';
+const tagEl = document.querySelector('.intro-tag'); if (tagEl) tagEl.textContent = '社團法人中華產業機械設備協會';
 
 function enter() {
   if (started) return; started = true;
